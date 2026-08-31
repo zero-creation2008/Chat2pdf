@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat2PDF — WhatsApp Chat to PDF Converter</title>
+<meta name="description" content="Convert your WhatsApp chat export into a beautiful, WhatsApp-styled PDF. 100% client-side — nothing is ever uploaded.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      </svg>
+    </div>
+    <span class="brand-name">Chat2PDF</span>
+  </div>
+  <p class="brand-tagline">Convert your WhatsApp chat into a beautiful PDF.</p>
+</header>
+
+<!-- ============ SCREEN: HOME / UPLOAD ============ -->
+<main id="screen-home" class="screen screen-home active">
+  <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload WhatsApp chat ZIP">
+    <div class="dropzone-icon">📦</div>
+    <p class="dropzone-title">Drop WhatsApp ZIP here</p>
+    <p class="dropzone-sub">or</p>
+    <button class="btn btn-primary" id="btn-choose-zip" type="button">Choose ZIP</button>
+    <input type="file" id="file-input" accept=".zip" hidden>
+  </div>
+
+  <div class="privacy-note">
+    <span class="lock-icon">🔒</span>
+    Your chat stays on your device. Nothing is uploaded.
+  </div>
+
+  <div class="home-info-grid">
+    <div class="info-card">
+      <div class="info-card-icon">💬</div>
+      <h3>Faithful recreation</h3>
+      <p>Bubbles, timestamps, sender colors — styled to look like the real thing.</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">🖼️</div>
+      <h3>Media in place</h3>
+      <p>Photos, videos, voice notes and documents appear exactly where they were sent.</p>
+    </div>
+    <div class="info-card">
+      <div class="info-card-icon">📄</div>
+      <h3>Print-ready PDF</h3>
+      <p>Clean A4/Letter pages, page numbers, and a proper title page.</p>
+    </div>
+  </div>
+</main>
+
+<!-- ============ SCREEN: PROCESSING (extraction/parsing) ============ -->
+<main id="screen-processing" class="screen screen-processing">
+  <div class="processing-box">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="processing-step" id="processing-step">Extracting chat...</p>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progress-bar-fill"></div>
+    </div>
+    <p class="processing-detail" id="processing-detail"></p>
+  </div>
+</main>
+
+<!-- ============ SCREEN: WORKSPACE (settings + preview) ============ -->
+<main id="screen-workspace" class="screen screen-workspace">
+  <div class="workspace-grid">
+
+    <!-- LEFT PANEL -->
+    <aside class="panel panel-left">
+      <section class="panel-section">
+        <h2 class="panel-title">Chat Info</h2>
+        <div class="chat-info" id="chat-info">
+          <div class="chat-info-row"><span>Chat</span><strong id="info-chat-name">—</strong></div>
+          <div class="chat-info-row"><span>Messages</span><strong id="info-msg-count">—</strong></div>
+          <div class="chat-info-row"><span>Participants</span><strong id="info-participants">—</strong></div>
+          <div class="chat-info-row"><span>Media files</span><strong id="info-media-count">—</strong></div>
+          <div class="chat-info-row"><span>Date range</span><strong id="info-date-range">—</strong></div>
+        </div>
+        <div class="warnings-box" id="warnings-box" hidden></div>
+      </section>
+
+      <section class="panel-section">
+        <h2 class="panel-title">PDF Settings</h2>
+
+        <div class="field">
+          <label for="setting-title">Chat title</label>
+          <input type="text" id="setting-title" placeholder="e.g. Seron & Friends">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="setting-pagesize">Page size</label>
+            <select id="setting-pagesize">
+              <option value="a4">A4</option>
+              <option value="letter">Letter</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="setting-orientation">Orientation</label>
+            <select id="setting-orientation">
+              <option value="portrait">Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="setting-fontsize">Font size</label>
+            <select id="setting-fontsize">
+              <option value="small">Small</option>
+              <option value="medium" selected>Medium</option>
+              <option value="large">Large</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="setting-spacing">Message spacing</label>
+            <select id="setting-spacing">
+              <option value="compact">Compact</option>
+              <option value="normal" selected>Normal</option>
+              <option value="relaxed">Relaxed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="setting-imgquality">Image quality</label>
+          <select id="setting-imgquality">
+            <option value="low">Low (smaller file)</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High (larger file)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="setting-theme">Theme</label>
+          <select id="setting-theme">
+            <option value="light" selected>Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+
+        <div class="toggles-grid">
+          <label class="toggle"><input type="checkbox" id="setting-timestamps" checked><span>Timestamps</span></label>
+          <label class="toggle"><input type="checkbox" id="setting-sendernames" checked><span>Sender names</span></label>
+          <label class="toggle"><input type="checkbox" id="setting-media" checked><span>Media</span></label>
+          <label class="toggle"><input type="checkbox" id="setting-videos" checked><span>Videos</span></label>
+          <label class="toggle"><input type="checkbox" id="setting-audio" checked><span>Audio</span></label>
+          <label class="toggle"><input type="checkbox" id="setting-documents" checked><span>Documents</span></label>
+          <label class="toggle"><input type="checkbox" id="setting-pagenumbers" checked><span>Page numbers</span></label>
+        </div>
+      </section>
+
+      <div class="panel-actions">
+        <button class="btn btn-secondary" id="btn-start-over" type="button">Start Over</button>
+        <button class="btn btn-primary btn-generate" id="btn-generate-pdf" type="button">Generate PDF</button>
+      </div>
+    </aside>
+
+    <!-- RIGHT PANEL: LIVE PREVIEW -->
+    <section class="panel panel-right">
+      <div class="preview-toolbar">
+        <h2 class="panel-title">Live Preview</h2>
+        <span class="preview-count" id="preview-count"></span>
+      </div>
+      <div class="chat-preview-wrap" id="chat-preview-wrap">
+        <div class="chat-preview" id="chat-preview"></div>
+        <div class="preview-sentinel" id="preview-sentinel"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ============ SCREEN: PDF GENERATION PROGRESS ============ -->
+<main id="screen-generating" class="screen screen-generating">
+  <div class="processing-box">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="processing-step" id="gen-step">Building conversation...</p>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="gen-progress-fill"></div>
+    </div>
+    <p class="processing-detail" id="gen-detail"></p>
+  </div>
+</main>
+
+<!-- ============ SCREEN: DONE ============ -->
+<main id="screen-done" class="screen screen-done">
+  <div class="done-box">
+    <div class="done-icon">✅</div>
+    <h2>PDF Ready</h2>
+    <p id="done-summary"></p>
+    <div class="done-actions">
+      <a class="btn btn-primary" id="btn-download" download>Download PDF</a>
+      <button class="btn btn-secondary" id="btn-create-another" type="button">Create Another</button>
+    </div>
+  </div>
+</main>
+
+<footer class="app-footer">
+  <p>🔒 100% client-side. Your chat and media never leave this device.</p>
+</footer>
+
+<!-- Libraries (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- App -->
+<script src="script.js" type="module"></script>
+</body>
+</html>
